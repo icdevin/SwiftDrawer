@@ -72,7 +72,13 @@ struct MainContainer<Content: View>: View {
             let will = self.offset + (value.translation.width - self.gestureCurrent)
             if self.leftRear.type != .none {
                 let range = 0...self.leftRear.sliderWidth
-                if range.contains(will) && value.startLocation.x < 20 {
+                var shouldMove: Bool {
+                    switch self.rightRear.currentStatus {
+                    case .show, .moving: return true
+                    case .hide: return value.startLocation.x < 20
+                    }
+                }
+                if range.contains(will) && shouldMove {
                     self.leftRear.currentStatus = .moving(offset: will)
                     self.gestureCurrent = value.translation.width
                 }
@@ -80,7 +86,13 @@ struct MainContainer<Content: View>: View {
 
             if self.rightRear.type != .none {
                 let range = (-self.rightRear.sliderWidth)...0
-                if range.contains(will) && value.startLocation.x > proxy.size.width - 20 {
+                var shouldMove: Bool {
+                    switch self.rightRear.currentStatus {
+                    case .show, .moving: return true
+                    case .hide: return value.startLocation.x > proxy.size.width - 20
+                    }
+                }
+                if range.contains(will) && shouldMove {
                     self.rightRear.currentStatus = .moving(offset: will)
                     self.gestureCurrent = value.translation.width
                 }
@@ -91,7 +103,7 @@ struct MainContainer<Content: View>: View {
                 let range = 0...self.leftRear.sliderWidth
                 if will - range.lowerBound <= range.upperBound - will {
                     self.leftRear.currentStatus = .hide
-                } else if value.startLocation.x < 20 {
+                } else if self.offset != 0 || value.startLocation.x < 20 {
                     self.leftRear.currentStatus = .show
                 }
             }
@@ -99,7 +111,7 @@ struct MainContainer<Content: View>: View {
                 let range = (-self.rightRear.sliderWidth)...0
                 if will - range.lowerBound >= range.upperBound - will {
                     self.rightRear.currentStatus = .hide
-                } else if value.startLocation.x > proxy.size.width - 20 {
+                } else if self.offset != 0 || value.startLocation.x > proxy.size.width - 20 {
                     self.rightRear.currentStatus = .show
                 }
             }
