@@ -41,7 +41,7 @@ struct SliderContainer<Content: SliderViewProtocol>: View {
                         .frame(maxWidth: self.status.sliderWidth)
                 }
                 .shadow(radius: self.status.showRate > 0 ? self.status.shadowRadius : 0)
-                .offset(x: self.status.sliderOffset() , y: 0)
+                .offset(x: self.status.sliderOffset(), y: 0)
                 .gesture(DragGesture().onChanged({ value in
                     if self.status.type.isLeft && value.translation.width < 0 {
                         self.status.currentStatus = .moving(offset: value.translation.width)
