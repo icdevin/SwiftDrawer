@@ -5,7 +5,5 @@ target 'SwiftDrawer_Example' do
 
   target 'SwiftDrawer_Tests' do
     inherit! :search_paths
-
-    
   end
 end

@@ -8,30 +8,31 @@
 
 import SwiftUI
 import Combine
-struct MainContainer<Content: View> : View {
+
+struct MainContainer<Content: View>: View {
     @ObservedObject private var drawerControl: DrawerControl
     @ObservedObject private var leftRear: SliderStatus
     @ObservedObject private var rightRear: SliderStatus
-    
     @State private var gestureCurrent: CGFloat = 0
     
     let main: AnyView
     private var maxMaskAlpha: CGFloat
     private var maskEnable: Bool
     var anyCancel: AnyCancellable?
+    
     var body: some View {
         GeometryReader { proxy in
             self.generateBody(proxy: proxy)
         }.animation(.default)
-        
     }
     
-    init(content: Content,
-         maxMaskAlpha: CGFloat = 0.25,
-         maskEnable: Bool = true,
-         drawerControl: DrawerControl) {
-        
-        self.main = AnyView.init(content.environmentObject(drawerControl))
+    init(
+        content: Content,
+        maxMaskAlpha: CGFloat = 0.25,
+        maskEnable: Bool = true,
+        drawerControl: DrawerControl
+    ) {
+        self.main = AnyView(content.environmentObject(drawerControl))
         self.maxMaskAlpha = maxMaskAlpha
         self.maskEnable = maskEnable
         self.drawerControl = drawerControl
@@ -51,17 +52,24 @@ struct MainContainer<Content: View> : View {
         return ZStack {
             self.main
             if maskEnable {
-               Color.black.opacity(Double(drawerControl.maxShowRate*self.maxMaskAlpha))
-                .animation(.easeIn(duration: 0.15))
+                Color.black
+                    .opacity(Double(drawerControl.maxShowRate * self.maxMaskAlpha))
+                    .animation(.easeIn(duration: 0.15))
                     .onTapGesture {
-                    self.drawerControl.hideAllSlider()
-                }.padding(EdgeInsets(top: -proxy.safeAreaInsets.top, leading: 0, bottom: -proxy.safeAreaInsets.bottom, trailing: 0))
+                        self.drawerControl.hideAllSlider()
+                    }
+                    .padding(EdgeInsets(
+                        top: -proxy.safeAreaInsets.top,
+                        leading: 0,
+                        bottom: -proxy.safeAreaInsets.bottom,
+                        trailing: 0
+                    ))
             }
         }
         .offset(x: self.offset, y: 0)
         .shadow(radius: maxRadius)
-        .gesture(DragGesture().onChanged({ (value) in
-            let will = self.offset + (value.translation.width-self.gestureCurrent)
+        .gesture(DragGesture().onChanged({ value in
+            let will = self.offset + (value.translation.width - self.gestureCurrent)
             if self.leftRear.type != .none {
                 let range = 0...self.leftRear.sliderWidth
                 if range.contains(will) {
@@ -77,15 +85,19 @@ struct MainContainer<Content: View> : View {
                     self.gestureCurrent = value.translation.width
                 }
             }
-        }).onEnded({ (value) in
-            let will = self.offset + (value.translation.width-self.gestureCurrent)
+        }).onEnded({ value in
+            let will = self.offset + (value.translation.width - self.gestureCurrent)
             if self.leftRear.type != .none {
                 let range = 0...self.leftRear.sliderWidth
-                self.leftRear.currentStatus = will-range.lowerBound > range.upperBound-will ? .show : .hide
+                self.leftRear.currentStatus = will - range.lowerBound > range.upperBound - will
+                    ? .show
+                    : .hide
             }
             if self.rightRear.type != .none {
                 let range = (-self.rightRear.sliderWidth)...0
-                self.rightRear.currentStatus = will-range.lowerBound < range.upperBound-will ? .show : .hide
+                self.rightRear.currentStatus = will - range.lowerBound < range.upperBound - will
+                    ? .show
+                    : .hide
             }
             self.gestureCurrent = 0
         }))
@@ -114,17 +126,15 @@ struct MainContainer<Content: View> : View {
     }
 }
 
-#if DEBUG
-struct MainContainer_Previews : PreviewProvider {
+struct MainContainer_Previews: PreviewProvider {
     static var previews: some View {
         self.generate()
     }
     
     static func generate() -> some View {
-        let view = DemoSlider.init(type: .leftRear)
+        let view = DemoSlider(type: .leftRear)
         let c = DrawerControl()
         c.setSlider(view: view)
-        return MainContainer.init(content: DemoMain(), drawerControl: c)
+        return MainContainer(content: DemoMain(), drawerControl: c)
     }
 }
-#endif

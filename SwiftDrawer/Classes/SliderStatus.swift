@@ -17,7 +17,7 @@ public class SliderStatus: ObservableObject {
         get {
             switch self.maxWidth {
             case .percent(let rate):
-                return parentSize.width*rate
+                return parentSize.width * rate
             case .width(let value):
                 return value
             }
@@ -33,11 +33,13 @@ public class SliderStatus: ObservableObject {
             case .show:
                 showRate = 1
             case .moving(let offset):
-                let width = parentSize.width/2
+                let width = parentSize.width / 2
                 if self.type.isLeft {
-                    showRate = self.type.isRear ? 1-(width-offset)/width : (width+offset)/width
+                    showRate = self.type.isRear
+                        ? 1 - (width - offset) / width
+                        : (width + offset) / width
                 } else {
-                    showRate = (width-offset)/width
+                    showRate = (width - offset) / width
                 }
             }
             objectDidChange.send(self)
@@ -54,10 +56,13 @@ public class SliderStatus: ObservableObject {
         }
     }
     
+    init(type: SliderType) {
+        self.type = type
+    }
+    
     func sliderOffset() -> CGFloat {
-        if self.type == .none {
-            return 0
-        }
+        if self.type == .none { return 0 }
+        
         let rearW = self.sliderWidth
         if self.type.isRear {
             switch currentStatus {
@@ -73,15 +78,10 @@ public class SliderStatus: ObservableObject {
             case .hide:
                 return self.type.isLeft ? -parentSize.width : parentSize.width
             case .moving(let offset):
-                let o = self.type.isLeft ? offset : parentSize.width-rearW+offset
-                return o
+                return self.type.isLeft ? offset : parentSize.width - rearW + offset
             case .show:
-                return self.type.isLeft ? 0 : parentSize.width-rearW
+                return self.type.isLeft ? 0 : parentSize.width - rearW
             }
         }
-    }
-    
-    init(type: SliderType) {
-        self.type = type
     }
 }
