@@ -72,7 +72,7 @@ struct MainContainer<Content: View>: View {
             let will = self.offset + (value.translation.width - self.gestureCurrent)
             if self.leftRear.type != .none {
                 let range = 0...self.leftRear.sliderWidth
-                if range.contains(will) {
+                if range.contains(will) && value.startLocation.x < 20 {
                     self.leftRear.currentStatus = .moving(offset: will)
                     self.gestureCurrent = value.translation.width
                 }
@@ -80,7 +80,7 @@ struct MainContainer<Content: View>: View {
 
             if self.rightRear.type != .none {
                 let range = (-self.rightRear.sliderWidth)...0
-                if range.contains(will) {
+                if range.contains(will) && value.startLocation.x > proxy.size.width - 20 {
                     self.rightRear.currentStatus = .moving(offset: will)
                     self.gestureCurrent = value.translation.width
                 }
@@ -89,15 +89,19 @@ struct MainContainer<Content: View>: View {
             let will = self.offset + (value.translation.width - self.gestureCurrent)
             if self.leftRear.type != .none {
                 let range = 0...self.leftRear.sliderWidth
-                self.leftRear.currentStatus = will - range.lowerBound > range.upperBound - will
-                    ? .show
-                    : .hide
+                if will - range.lowerBound <= range.upperBound - will {
+                    self.leftRear.currentStatus = .hide
+                } else if value.startLocation.x < 20 {
+                    self.leftRear.currentStatus = .show
+                }
             }
             if self.rightRear.type != .none {
                 let range = (-self.rightRear.sliderWidth)...0
-                self.rightRear.currentStatus = will - range.lowerBound < range.upperBound - will
-                    ? .show
-                    : .hide
+                if will - range.lowerBound >= range.upperBound - will {
+                    self.rightRear.currentStatus = .hide
+                } else if value.startLocation.x > proxy.size.width - 20 {
+                    self.rightRear.currentStatus = .show
+                }
             }
             self.gestureCurrent = 0
         }))
