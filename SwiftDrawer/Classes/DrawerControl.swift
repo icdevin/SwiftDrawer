@@ -28,7 +28,7 @@ public class DrawerControl: ObservableObject {
     }
     
     @Published private(set) var sliderView = [SliderType: AnyView]()
-    @Published private(set) var main: AnyView?
+    @Published public private(set) var main: AnyView?
     @Published private(set) var maxShowRate: CGFloat = .zero
 
     public func setSlider<Slider: SliderViewProtocol>(
